@@ -8,10 +8,10 @@ import re, requests, os
 from bs4 import BeautifulSoup
 
 nyaa_link = 'https://nyaa.si/'
-subs_only = 'https://subsplease.org/'
+#subs_only = 'https://subsplease.org/'
 
 #KEYWORDS TO SEARCH FOR WHEN SEARCHING FOR TITLE/MAGNETS
-anime_titles = ["Nanatsu", "Boku no Hero", "Nomad", "Aimer"]
+anime_titles = ["Nanatsu", "Boku no Hero", "Nomad", "Kabaddi"]
 
 request = requests.get(nyaa_link, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
@@ -38,6 +38,8 @@ for link in soup.findAll('a', attrs={'href': re.compile("^magnet")}):
 #START THE MAGNET DOWNLOADS
 for link in magnets:
     os.startfile(link)
-    magnets.remove(link)
-
-print("Now downloading", title)
+    
+#PRINT OUT WHATS DOWNLOADING
+print("DOWNLOADING:")
+for name in title:
+    print(name)
