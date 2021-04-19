@@ -6,7 +6,7 @@ def get_numbers_from_filename(filename):
     return re.search(r'\d+', number).group(0)
 
 file_path = "F:\Downloadz"
-keyword = "Nomad"
+keyword = "Nanatsu"
 
 for file in os.listdir(file_path):
     if keyword in file:
