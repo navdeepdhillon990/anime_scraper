@@ -30,12 +30,12 @@ def if_episode_exists(Name, GetName):
             else:
                 return file #return filename
 
-#def get_numbers_from_filename(filename):
-#    return re.search(r'\d+', filename).group(0)
-
 #FETCHING TITLE NAMES
 section = soup.findAll("font", {"class" : "aa_ss_blue"})
 titles = []
+
+#DATE
+#date_aired = soup.findAll("font", {"class" : "clock_time_white"})
 
 for row in section:
     desired_title = row.find('a')['data-title']
