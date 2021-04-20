@@ -2,60 +2,128 @@
 # Based off keywords specified in the array
 # 
 # Usage: Filters Magnet links based off keywords and 1080 to get 1080p
-#        Begins download only if file with that keyword doesnt exist in directory specified
-#        Fetches titles only if file with that keyword doesnt exist in directory specified
+#        Simply add whatever keywords from anime title into array (and make sure that anime is supported by erai raws)
+#        Begins download only if file with that keyword doesnt exist in directory specified and compared episode numbers as well
 
 import re, requests, os, os.path, fnmatch
 from bs4 import BeautifulSoup
 
-#subs_please = 'https://subsplease.org/'
-#nyaa_link   = 'https://nyaa.si/'
-erai_raws   = 'https://www.erai-raws.info/posts/'
-
+erai_raws = 'https://www.erai-raws.info/posts/'
 file_path = "F:\Downloadz"
 
-#KEYWORDS TO SEARCH FOR WHEN SEARCHING FOR TITLE/MAGNETS
-anime_titles = ["Nanatsu", "Academia", "Nomad"]
+#ANIME TITLES TO DOWNLOAD [Keep Names Short]
+anime_titles = ["Nanatsu no Taizai", 
+                "Boku no Hero",    
+                "Megalo Box 2",
+                "Yakunaru Mug Cup",
+                "Shadows House",
+                "Fumetsu no Anata"]
 
 request = requests.get(erai_raws, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
 soup = BeautifulSoup(source, 'lxml')
 
-#FUNCTION TO CHECK IF EPISODE ALREADY EXISTS IN DIRECTORY
-def if_episode_exists(Name, GetName):
-    for file in os.listdir(file_path):
-        if Name in file:
-            if GetName is False:
-                return True
-            else:
-                return file #return filename
+#---FUNCTIONS---#
 
-#FETCHING TITLE NAMES
-section = soup.findAll("font", {"class" : "aa_ss_blue"})
+#Color code text
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+# checks to see if episode aired and returns true/false IF ep_num is not requested
+# otherwise sends the episode number to be compared
+
+def if_episode_aired(anime1,ep):
+    for title in title_and_episode:
+        if anime1 in title:
+            if ep is True:
+                ep_num = re.search(" - (\d+)", title).group(0)
+                ep_num2 = re.search(r'\d+', ep_num).group(0)
+                return ep_num2
+            else:
+                 return True
+    return False
+
+def get_episode_index(anime2):
+    for ind, value in enumerate(title_and_episode):
+        if anime2 in value:
+            return ind
+
+#-----------FETCHING ALL LATEST RELEASE INFORMATION------------#
+
+#Fetch tags containing titles/ep number
+section = soup.findAll("article", {"class" : "era_center col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 nonmain border_radius_22"})
+
+#Grab new releases titles and episode numbers
 titles = []
-
-#DATE
-#date_aired = soup.findAll("font", {"class" : "clock_time_white"})
-
 for row in section:
-    desired_title = row.find('a')['data-title']
-    for name in anime_titles:
-        if name in desired_title:
-            if if_episode_exists(name, False) is not True:
-                titles.append(desired_title)            
+    
+    #Find matching tags to get title/episode number
+    new_titles = row.findAll(attrs={"class" : "aa_ss_ops"})
 
-#GET ALL MAGNETS AND FILTER OUT KEYWORDS/1080P
+    #Strip the tags away to get the text and append to array
+    for tag in new_titles:
+        titles.append(tag.text.strip())
+
+#Sort the array and attach anime title to episode number and store inside a new array and print
+title_and_episode = []
+
+for idx, val in enumerate(titles):
+    try:
+        full_title = (titles[idx] + " - " + titles[idx+1])
+        title_and_episode.append(full_title)
+        try:
+            titles.remove(titles[idx+1])
+        except:
+            print("Next index is null")
+    except:
+        print("List End")
+
+#Get all magnets on the episode lists
 magnets = []
-for link in soup.findAll('a', attrs={'href': re.compile("^magnet")}):
-    for name in anime_titles: 
-        if name in link.get('href') and "1080" in link.get('href'):
-            if if_episode_exists(name, False) is not True: #if it doesnt exist in directory
-                magnets.append(link.get('href'))
-            else:
-                print("Episode Exists:", if_episode_exists(name, True))
 
-#START THE MAGNET DOWNLOADS
-for link in magnets:
-    os.startfile(link)
-    print("Downloading:")
-    print(titles)
+for link in soup.findAll('a', attrs={'href': re.compile("^magnet")}):
+    if "1080" in link.get('href'):
+        magnets.append(link.get('href'))
+
+#------------ VV OUTPUT VV ----------------------#
+
+for name in anime_titles:
+
+    #Boolean Variables 
+    did_air = if_episode_aired(name,False)
+    aired_num = if_episode_aired(name,True)
+
+    for file in os.listdir(file_path):
+        if name in file:
+            does_exist = True
+            number = re.search(" - (\d+)", file).group(0)
+            file_num = re.search(r'\d+', number).group(0)
+            break
+        else:
+            does_exist = False
+
+    #Array index to fetch titles/magnet
+    ep_index = get_episode_index(name)
+
+    #check if episode aired, and if episode exists in directory
+    if did_air is True:
+        if does_exist is False:
+            print(bcolors.OKGREEN + "Episode", aired_num, "of", name, "aired today!" + bcolors.ENDC)
+            print(bcolors.OKCYAN + "Downloading:" , name, aired_num + bcolors.ENDC)
+            target_magnet = get_episode_index(name)
+            os.startfile(magnets[target_magnet])
+        else:
+            if aired_num not in file_num:  
+                print(bcolors.OKCYAN + "Downloading:" , name, aired_num, file_num + bcolors.ENDC)
+                target_magnet = get_episode_index(name)
+                os.startfile(magnets[target_magnet])
+            else:
+                print(bcolors.WARNING + name , file_num, "already exists." + bcolors.ENDC)
