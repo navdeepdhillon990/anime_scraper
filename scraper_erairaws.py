@@ -16,14 +16,7 @@ file_path = "F:\Downloadz"
 anime_titles = ["Nanatsu no Taizai", 
                 "Boku no Hero Academia",    
                 "Megalo Box 2",
-                "Odd Taxi",
-                "Seijo no Maryoku wa Bannou Desu",
-                "Jouran: The Princess of Snow and Blood",
-                "Tensura Nikki: Tensei Shitara Slime Datta Ken",
-                "Mars Red",
-                "Bishounen Tanteidan",
-                "Vivy: Fluorite Eye's Song",
-                "Fruits Basket the Final"]
+                "Bishounen"]
 
 request = requests.get(erai_raws, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
@@ -110,6 +103,8 @@ for link in soup.findAll('a', attrs={'href': re.compile("^magnet")}):
 
 #------------ VV OUTPUT VV ----------------------#
 
+files_were_downloaded = False
+
 for name in anime_titles:
 
     #Boolean Variables 
@@ -136,7 +131,8 @@ for name in anime_titles:
 
     if did_air is True and "Today" in aired_today: # did a new episode air today
         if does_exist is False: #and doesnt exist in directory
-            print(bcolors.OKGREEN + "Episode", aired_num, "of", name, "aired today!" + bcolors.ENDC)
+            files_were_downloaded = True
+            print(bcolors.OKGREEN + "Episode", aired_num, "of", name, "aired today! ┗(•̀へ •́ ╮ )" + bcolors.ENDC)
             print(bcolors.OKCYAN + "Downloading:" , name, aired_num + bcolors.ENDC)
             target_magnet = get_episode_index(name)
             os.startfile(magnets[target_magnet])
@@ -147,3 +143,5 @@ for name in anime_titles:
                 os.startfile(magnets[target_magnet])
             else:
                 print(bcolors.WARNING + name , file_num, "already exists." + bcolors.ENDC)
+if files_were_downloaded is False:
+    print(bcolors.WARNING + "Nothing aired today... ( ꒪Д꒪)ノ " + bcolors.ENDC)
