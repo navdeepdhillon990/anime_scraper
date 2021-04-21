@@ -5,9 +5,7 @@
  # Goes through list of keywords to find matching anime that aired
  # If did air, checks directory to see if episode doesnt already exists
  # Downloads all episodes that dont exist
- 
- Additional Functions to add:
- # Only check anime with the NEW tag, or that aired TODAY (Could be done by comparing release time/date)
+ # Fetches "Today" tags and puts in its own array to see if anime aired today
  
  Scraper for Nyaa is incomplete and will grab anything that matches the keyword on the first page
 
