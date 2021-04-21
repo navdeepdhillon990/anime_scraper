@@ -11,13 +11,19 @@ from bs4 import BeautifulSoup
 erai_raws = 'https://www.erai-raws.info/posts/'
 file_path = "F:\Downloadz"
 
-#ANIME TITLES TO DOWNLOAD [Keep Names Short]
+#ANIME TITLES TO DOWNLOAD 
+#NOTE: Make sure each name has a comma at the end or else the item will be ignored
 anime_titles = ["Nanatsu no Taizai", 
-                "Boku no Hero",    
+                "Boku no Hero Academia",    
                 "Megalo Box 2",
-                "Yakunaru Mug Cup",
-                "Shadows House",
-                "Fumetsu no Anata"]
+                "Odd Taxi",
+                "Seijo no Maryoku wa Bannou Desu",
+                "Jouran: The Princess of Snow and Blood",
+                "Tensura Nikki: Tensei Shitara Slime Datta Ken",
+                "Mars Red",
+                "Bishounen Tanteidan",
+                "Vivy: Fluorite Eye's Song",
+                "Fruits Basket the Final"]
 
 request = requests.get(erai_raws, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
@@ -60,6 +66,15 @@ def get_episode_index(anime2):
 
 #Fetch tags containing titles/ep number
 section = soup.findAll("article", {"class" : "era_center col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 nonmain border_radius_22"})
+
+#Fetch "Today" Tags signifying if episode aired today
+today_tags = []
+
+for item in section:
+    tags = item.findAll(attrs={"class" : "clock_time_green"})
+    for x in tags:
+        today_tags.append(x.text.strip())
+
 
 #Grab new releases titles and episode numbers
 titles = []
@@ -110,18 +125,23 @@ for name in anime_titles:
         else:
             does_exist = False
 
-    #Array index to fetch titles/magnet
+    #Array index to fetch titles/magnet/air time
     ep_index = get_episode_index(name)
 
-    #check if episode aired, and if episode exists in directory
-    if did_air is True:
-        if does_exist is False:
+    #Check if index has "Today" tag, IF index exists, otherwise just store "None"
+    try:
+        aired_today = today_tags[ep_index]
+    except:
+        aired_today = "None"
+
+    if did_air is True and "Today" in aired_today: # did a new episode air today
+        if does_exist is False: #and doesnt exist in directory
             print(bcolors.OKGREEN + "Episode", aired_num, "of", name, "aired today!" + bcolors.ENDC)
             print(bcolors.OKCYAN + "Downloading:" , name, aired_num + bcolors.ENDC)
             target_magnet = get_episode_index(name)
             os.startfile(magnets[target_magnet])
-        else:
-            if aired_num not in file_num:  
+        else: #does exist in directory
+            if aired_num not in file_num: #if episode number is different, start download
                 print(bcolors.OKCYAN + "Downloading:" , name, aired_num, file_num + bcolors.ENDC)
                 target_magnet = get_episode_index(name)
                 os.startfile(magnets[target_magnet])
