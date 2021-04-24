@@ -7,18 +7,25 @@
 import re, requests, os
 from bs4 import BeautifulSoup
 
-nyaa_link = 'https://nyaa.si/'
+nyaa_link = 'https://nyaa.si/?f=0&c=1_2&q='
 
 #KEYWORDS TO SEARCH FOR WHEN SEARCHING FOR TITLE/MAGNETS
-anime_titles = ["Nanatsu", "Boku no Hero", "Nomad", "Kabaddi", "Tokyo"]
+anime_titles = ["Nanatsu no Taizai", 
+                "Boku no Hero Academia",    
+                "Megalo Box 2",]
 
-request = requests.get(nyaa_link, headers={'User-Agent': 'Mozilla/5.0'})
+for x in anime_titles:
+    new_link = nyaa_link+x
+
+request = requests.get(new_link, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
 soup = BeautifulSoup(source, 'lxml')
 
-#GETTING TORRENT NAMES
+#--------------
+
 title = []
 rows = soup.findAll("td", colspan="2")
+
 for row in rows:
 #FIND TITLES
     desired_title = row.find('a')['title']
@@ -34,15 +41,3 @@ for link in soup.findAll('a', attrs={'href': re.compile("^magnet")}):
         if name in link.get('href'):
             magnets.append(link.get('href'))
 
-#START THE MAGNET DOWNLOADS
-for link in magnets:
-    os.startfile(link)
-    
-#IF ARRAY EMPTY
-if not title:
-    print("NO ANIME FOUND")
-    
-#PRINT OUT WHATS DOWNLOADING
-for name in title:
-    print("DOWNLOADING:")
-    print(name)

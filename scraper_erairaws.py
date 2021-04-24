@@ -16,7 +16,7 @@ file_path = "F:\Downloadz"
 anime_titles = ["Nanatsu no Taizai", 
                 "Boku no Hero Academia",    
                 "Megalo Box 2",
-                "Bishounen"]
+                "Super Cub",]
 
 request = requests.get(erai_raws, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
