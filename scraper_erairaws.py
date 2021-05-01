@@ -15,8 +15,7 @@ file_path = "F:\Downloadz"
 #NOTE: Make sure each name has a comma at the end or else the item will be ignored
 anime_titles = ["Nanatsu no Taizai", 
                 "Boku no Hero Academia",    
-                "Megalo Box 2",
-                "Super Cub",]
+                "Megalo Box 2",]
 
 request = requests.get(erai_raws, headers={'User-Agent': 'Mozilla/5.0'})
 source = request.content
